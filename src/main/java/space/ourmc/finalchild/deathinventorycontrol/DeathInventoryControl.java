@@ -29,9 +29,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public final class DeathInventoryControl extends JavaPlugin {
 
@@ -42,12 +42,16 @@ public final class DeathInventoryControl extends JavaPlugin {
         randomGenerator = new Random();
         listener = new DeathListener(this);
         ConfigurationSection itemSection = getConfig().getConfigurationSection("items");
-        listener.items = itemSection.getKeys(false).stream().collect(Collectors.toMap(UUID::fromString, e -> (List<ItemStack>) itemSection.getList(e)));
+        for (String key : itemSection.getKeys(false)) {
+            listener.items.put(UUID.fromString(key), (List<ItemStack>) itemSection.getList(key));
+        }
         getServer().getPluginManager().registerEvents(listener, this);
     }
 
     public void onDisable() {
         getConfig().set("items", null);
-        listener.items.entrySet().stream().forEach(e -> getConfig().getConfigurationSection("items").set(e.getKey().toString(), e.getValue()));
+        for (Map.Entry entry : listener.items.entrySet()) {
+            getConfig().getConfigurationSection("items").set(entry.getKey().toString(), entry.getValue());
+        }
     }
 }

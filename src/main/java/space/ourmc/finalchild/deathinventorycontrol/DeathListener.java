@@ -34,12 +34,11 @@ import org.bukkit.permissions.Permissible;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 final class DeathListener implements Listener {
 
     private DeathInventoryControl plugin;
-    Map<UUID, List<ItemStack>> items = new HashMap<>();
+    Map<UUID, List<ItemStack>> items = new HashMap<UUID, List<ItemStack>>();
 
     DeathListener(DeathInventoryControl plugin) {
         this.plugin = plugin;
@@ -63,7 +62,7 @@ final class DeathListener implements Listener {
         event.setKeepInventory(false);
 
         Map<Material, Integer> permissionMaterialIntegerMap = getPermissionMaterialIntegerMap(event.getEntity(), "deathinventorycontrol.item");
-        List<ItemStack> keptItems = new ArrayList<>();
+        List<ItemStack> keptItems = new ArrayList<ItemStack>();
         for (Iterator<ItemStack> it = event.getDrops().iterator(); it.hasNext();) {
             ItemStack item = it.next();
             if (permissionMaterialIntegerMap.containsKey(item.getType())) {
@@ -86,7 +85,8 @@ final class DeathListener implements Listener {
     @EventHandler
     public void onRespawn(PlayerRespawnEvent event) {
         if (items.containsKey(event.getPlayer().getUniqueId())) {
-            items.get(event.getPlayer().getUniqueId()).stream().forEach(e -> event.getPlayer().getInventory().addItem(e));
+            for (ItemStack item : items.get(event.getPlayer().getUniqueId()))
+                event.getPlayer().getInventory().addItem(item);
             items.remove(event.getPlayer().getUniqueId());
         }
     }
@@ -97,15 +97,34 @@ final class DeathListener implements Listener {
 
     public Map<Material, Integer> getPermissionMaterialIntegerMap(Permissible permissible, String permission) {
         List<String> permissionStringListDeep = getPermissionStringListDeep(permissible, permission);
-        return permissionStringListDeep.stream().map(e -> e.split("\\.")).filter(e -> e.length == 2).collect(Collectors.toMap(e -> Material.getMaterial(e[0].toUpperCase()), e -> Integer.parseInt(e[1])));
+        Map<Material, Integer> result = new HashMap<Material, Integer>();
+        for (String text : permissionStringListDeep) {
+            String[] splitted = text.split("\\.");
+            if (splitted.length == 2) {
+                result.put(Material.getMaterial(splitted[0].toUpperCase()), Integer.parseInt(splitted[1]));
+            }
+        }
+        return result;
     }
 
     public String getPermissionStringDeep(Permissible permissible, String permission) {
-        return permissible.getEffectivePermissions().stream().map(PermissionAttachmentInfo::getPermission).filter(e -> e.startsWith(permission + ".")).collect(Collectors.toList()).get(0).replaceFirst(permission + ".", "");
+        List<String> list = new ArrayList<String>();
+        for (PermissionAttachmentInfo info : permissible.getEffectivePermissions()) {
+            if (info.getPermission().startsWith(permission + ".")) {
+                list.add(info.getPermission());
+            }
+        }
+        return list.get(0).replaceFirst(permission + ".", "");
     }
 
     public List<String> getPermissionStringListDeep(Permissible permissible, String permission) {
-        return permissible.getEffectivePermissions().stream().map(PermissionAttachmentInfo::getPermission).filter(e -> e.startsWith(permission + ".")).map(e -> e.replaceFirst(permission + ".", "")).collect(Collectors.toList());
+        List<String> result = new ArrayList<String>();
+        for (PermissionAttachmentInfo info : permissible.getEffectivePermissions()) {
+            if (info.getPermission().startsWith(permission + ".")) {
+                result.add(info.getPermission().replaceFirst(permission + ".", ""));
+            }
+        }
+        return result;
     }
 
 }
