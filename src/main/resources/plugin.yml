@@ -1,0 +1,12 @@
+name: DeathInventoryControl
+version: 0.0.1-SNAPSHOT
+description: Control the inventory after death.
+author: Final Child
+main: space.ourmc.finalchild.deathinventorycontrol.DeathInventoryControl
+permissions:
+  deathinventorycontrol.keepLevel.true:
+    description: Keep its level on death.
+    default: false
+  deathinventorycontrol.keepLevel.false:
+    description: Do not keep its level on death.
+    default: false
