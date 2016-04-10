@@ -24,16 +24,30 @@
 
 package space.ourmc.finalchild.deathinventorycontrol;
 
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.List;
 import java.util.Random;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 public final class DeathInventoryControl extends JavaPlugin {
 
     Random randomGenerator;
+    private DeathListener listener;
 
     public void onEnable() {
         randomGenerator = new Random();
-        getServer().getPluginManager().registerEvents(new DeathListener(this), this);
+        listener = new DeathListener(this);
+        ConfigurationSection itemSection = getConfig().getConfigurationSection("items");
+        listener.items = itemSection.getKeys(false).stream().collect(Collectors.toMap(UUID::fromString, e -> (List<ItemStack>) itemSection.getList(e)));
+        getServer().getPluginManager().registerEvents(listener, this);
+    }
+
+    public void onDisable() {
+        getConfig().set("items", null);
+        listener.items.entrySet().stream().forEach(e -> getConfig().getConfigurationSection("items").set(e.getKey().toString(), e.getValue()));
     }
 }

@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 final class DeathListener implements Listener {
 
     private DeathInventoryControl plugin;
-    private Map<UUID, List<ItemStack>> items = new HashMap<>();
+    Map<UUID, List<ItemStack>> items = new HashMap<>();
 
     DeathListener(DeathInventoryControl plugin) {
         this.plugin = plugin;
