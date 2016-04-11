@@ -41,9 +41,11 @@ public final class DeathInventoryControl extends JavaPlugin {
     public void onEnable() {
         randomGenerator = new Random();
         listener = new DeathListener(this);
-        ConfigurationSection itemSection = getConfig().getConfigurationSection("items");
-        for (String key : itemSection.getKeys(false)) {
-            listener.items.put(UUID.fromString(key), (List<ItemStack>) itemSection.getList(key));
+        if (getConfig().isConfigurationSection("items")) {
+            ConfigurationSection itemSection = getConfig().getConfigurationSection("items");
+            for (String key : itemSection.getKeys(false)) {
+                listener.items.put(UUID.fromString(key), (List<ItemStack>) itemSection.getList(key));
+            }
         }
         getServer().getPluginManager().registerEvents(listener, this);
     }
@@ -51,7 +53,7 @@ public final class DeathInventoryControl extends JavaPlugin {
     public void onDisable() {
         getConfig().set("items", null);
         for (Map.Entry entry : listener.items.entrySet()) {
-            getConfig().getConfigurationSection("items").set(entry.getKey().toString(), entry.getValue());
+            getConfig().set("items." + entry.getKey().toString(), entry.getValue());
         }
     }
 }
