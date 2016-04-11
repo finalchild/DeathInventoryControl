@@ -55,5 +55,6 @@ public final class DeathInventoryControl extends JavaPlugin {
         for (Map.Entry entry : listener.items.entrySet()) {
             getConfig().set("items." + entry.getKey().toString(), entry.getValue());
         }
+        saveConfig();
     }
 }
